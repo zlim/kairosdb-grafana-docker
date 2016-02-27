@@ -1,0 +1,42 @@
+cassandra:
+  #image: spotify/cassandra:latest
+  image: cassandra:2.2
+  volumes:
+    - ./data/cassandra:/var/lib/cassandra
+  ports:
+    - 7199:7199
+  expose:
+    - 9160
+  environment:
+    - CASSANDRA_START_RPC=true
+kairosdb:
+  image: mesosphere/archlinux-kairosdb:master
+  links:
+    - cassandra
+  volumes:
+    - ./data/kairosdb/log:/opt/kairosdb/log
+    - ./data/kairosdb/data:/data
+  ports:
+    - 8080:8080
+  expose:
+    - 4242
+  environment:
+    - CASS_HOSTS=cassandra:9160
+grafana:
+  image: grafana/grafana:2.6.0
+  ports:
+    - 3000:3000
+  links:
+    - kairosdb
+  volumes:
+    - ./data/grafana:/var/lib/grafana
+collectd:
+  image: zlim/collectd-kairosdb
+  links:
+    - kairosdb
+  expose:
+    - 8125
+  environment:
+    - CONFIG_TYPE=kairosdb
+    - EP_HOST=kairosdb
+    - EP_PORT=4242
