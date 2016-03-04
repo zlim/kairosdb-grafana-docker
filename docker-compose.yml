@@ -34,9 +34,14 @@ collectd:
   image: zlim/collectd-kairosdb
   links:
     - kairosdb
+  volumes:
+    - /dev/sda:/dev/sda:ro
+    - /dev/sdb:/dev/sdb:ro
+    - /dev/mapper:/dev/mapper:ro
   expose:
     - 8125
   environment:
     - CONFIG_TYPE=kairosdb
     - EP_HOST=kairosdb
     - EP_PORT=4242
+    - IOSTAT_DISKS=sda,sdb
